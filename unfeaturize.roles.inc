@@ -49,28 +49,28 @@ function unfeaturize_generate_roles_function($module_name) {
 
   // Begin refactored function string output.
   $new = array();
-  $new []= '/**';
-  $new []= ' * Defines default roles.';
-  $new []= ' *';
-  $new []= ' * Role info from deprecated ' . $module_name . '_user_default_roles().';
-  $new []= ' *';
-  $new []= ' * @return array';
-  $new []= ' *   An array of role objects.';
-  $new []= ' */';
-  $new []= 'function ' . $module_name . '_roles() {';
-  $new []= '  $roles = array();';
-  $new []= '';
+  $new[] = '/**';
+  $new[] = ' * Defines default roles.';
+  $new[] = ' *';
+  $new[] = ' * Role info from deprecated ' . $module_name . '_user_default_roles().';
+  $new[] = ' *';
+  $new[] = ' * @return array';
+  $new[] = ' *   An array of role objects.';
+  $new[] = ' */';
+  $new[] = 'function ' . $module_name . '_roles() {';
+  $new[] = '  $roles = array();';
+  $new[] = '';
 
   foreach ($old() as $role) {
-    $new []= '  $role = new stdClass();';
-    $new []= '  $role->name = \'' . $role['name'] . '\';';
-    $new []= '  $role->weight = ' . $role['weight'] . ';';
-    $new []= '  $roles[] = $role;';
-    $new []= '';
+    $new[] = '  $role = new stdClass();';
+    $new[] = '  $role->name = \'' . $role['name'] . '\';';
+    $new[] = '  $role->weight = ' . $role['weight'] . ';';
+    $new[] = '  $roles[] = $role;';
+    $new[] = '';
   }
 
-  $new []= '  return $roles;';
-  $new []= "}";
+  $new[] = '  return $roles;';
+  $new[] = "}";
 
   return implode("\n", $new);
 }

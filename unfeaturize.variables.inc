@@ -49,25 +49,25 @@ function unfeaturize_generate_variables_function($module_name) {
 
   // Begin refactored function string output.
   $new = array();
-  $new []= '/**';
-  $new []= ' * Defines default variables.';
-  $new []= ' *';
-  $new []= ' * Variable info from deprecated ' . $module_name . '_strongarm().';
-  $new []= ' *';
-  $new []= ' * @return array';
-  $new []= ' *   An associative array of variable values, keyed by name.';
-  $new []= ' */';
-  $new []= 'function ' . $module_name . '_variables() {';
-  $new []= '  $variables = array();';
-  $new []= '';
+  $new[] = '/**';
+  $new[] = ' * Defines default variables.';
+  $new[] = ' *';
+  $new[] = ' * Variable info from deprecated ' . $module_name . '_strongarm().';
+  $new[] = ' *';
+  $new[] = ' * @return array';
+  $new[] = ' *   An associative array of variable values, keyed by name.';
+  $new[] = ' */';
+  $new[] = 'function ' . $module_name . '_variables() {';
+  $new[] = '  $variables = array();';
+  $new[] = '';
 
   foreach ($old() as $strongarm) {
-    $new []= '  $variables[\'' . $strongarm->name . '\'] = ' . $strongarm->value . ';';
-    $new []= '';
+    $new[] = '  $variables[\'' . $strongarm->name . '\'] = ' . $strongarm->value . ';';
+    $new[] = '';
   }
 
-  $new []= '  return $variables;';
-  $new []= "}";
+  $new[] = '  return $variables;';
+  $new[] = "}";
 
   return implode("\n", $new);
 }

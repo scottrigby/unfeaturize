@@ -51,17 +51,17 @@ function unfeaturize_generate_permissions_function($module_name) {
 
   // Begin refactored function string output.
   $new = array();
-  $new []= '/**';
-  $new []= ' * Defines default permissions.';
-  $new []= ' *';
-  $new []= ' * Permission info from deprecated ' . $module_name . '_user_default_permissions().';
-  $new []= ' *';
-  $new []= ' * @return array';
-  $new []= ' *   An associative array of permission names, keyed by role name.';
-  $new []= ' */';
-  $new []= 'function ' . $module_name . '_permissions() {';
-  $new []= '  $permissions = array();';
-  $new []= '';
+  $new[] = '/**';
+  $new[] = ' * Defines default permissions.';
+  $new[] = ' *';
+  $new[] = ' * Permission info from deprecated ' . $module_name . '_user_default_permissions().';
+  $new[] = ' *';
+  $new[] = ' * @return array';
+  $new[] = ' *   An associative array of permission names, keyed by role name.';
+  $new[] = ' */';
+  $new[] = 'function ' . $module_name . '_permissions() {';
+  $new[] = '  $permissions = array();';
+  $new[] = '';
 
   $roles = array();
   foreach ($old() as $permission) {
@@ -76,16 +76,16 @@ function unfeaturize_generate_permissions_function($module_name) {
   }
 
   foreach ($roles as $role_name => $permissions) {
-    $new []= '  $permissions[\'' . $role_name . '\'] = array(';
+    $new[] = '  $permissions[\'' . $role_name . '\'] = array(';
     foreach ($permissions as $permission_name) {
-      $new []= '    \'' . $permission_name . '\',';
+      $new[] = '    \'' . $permission_name . '\',';
     }
-    $new []= '  );';
-    $new []= '';
+    $new[] = '  );';
+    $new[] = '';
   }
 
-  $new []= '  return $permissions;';
-  $new []= "}";
+  $new[] = '  return $permissions;';
+  $new[] = "}";
 
   return implode("\n", $new);
 }
