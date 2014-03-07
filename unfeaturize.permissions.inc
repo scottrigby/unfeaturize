@@ -6,15 +6,43 @@
  */
 
 /**
+ * Generates a function to install default permissions.
+ *
+ * @param string $module_name
+ *   The name of the implementing module being refactored.
+ *
+ * @return string
+ *   A generated installation function named MODULE_install_permissions() for
+ *   MODULE.install. Then call this generated function in MODULE_install().
+ */
+function unfeaturize_generate_install_permissions_function($module_name) {
+  $new = array();
+  $new[] = '/**';
+  $new[] = ' * Installs default permissions.';
+  $new[] = ' */';
+  $new[] = 'function ' . $module_name . '_install_permissions() {';
+  $new[] = '  foreach (' . $module_name . '_permissions() as $role_name => $permissions) {';
+  $new[] = '    if ($role = user_role_load_by_name($role_name)) {';
+  $new[] = '      user_role_grant_permissions($role->rid, $permissions);';
+  $new[] = '    }';
+  $new[] = '  }';
+  $new[] = '}';
+
+  return implode("\n", $new);
+}
+
+/**
+ * Generates a function to define default permissions.
+ *
  * Refactors an implementation of hook_user_default_permissions().
  *
  * @param string $module_name
  *   The name of the implementing module being refactored.
  *
  * @return string
- *   A refactored function string.
+ *   A generated function named MODULE_permissions() for MODULE.install.
  */
-function unfeaturize_refactor_hook_user_default_permissions($module_name) {
+function unfeaturize_generate_permissions_function($module_name) {
   $old = $module_name . '_user_default_permissions';
   // Assumes the function is loaded. If not, bail.
   if (!function_exists($old)) {

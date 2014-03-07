@@ -6,15 +6,41 @@
  */
 
 /**
+ * Generates a function to install default variables.
+ *
+ * @param string $module_name
+ *   The name of the implementing module being refactored.
+ *
+ * @return string
+ *   A generated installation function named MODULE_install_variables() for
+ *   MODULE.install. Then call this generated function in MODULE_install().
+ */
+function unfeaturize_generate_install_variables_function($module_name) {
+  $new = array();
+  $new[] = '/**';
+  $new[] = ' * Installs default variables.';
+  $new[] = ' */';
+  $new[] = 'function ' . $module_name . '_install_variables() {';
+  $new[] = '  foreach (' . $module_name . '_variables() as $name => $value) {';
+  $new[] = '    variable_set($name, $value);';
+  $new[] = '  }';
+  $new[] = '}';
+
+  return implode("\n", $new);
+}
+
+/**
+ * Generates a function to define default variables.
+ *
  * Refactors an implementation of hook_strongarm().
  *
  * @param string $module_name
  *   The name of the implementing module being refactored.
  *
  * @return string
- *   A refactored function string.
+ *   A generated function named MODULE_variables() for MODULE.install.
  */
-function unfeaturize_refactor_hook_strongarm($module_name) {
+function unfeaturize_generate_variables_function($module_name) {
   $old = $module_name . '_strongarm';
   // Assumes the function is loaded. If not, bail.
   if (!function_exists($old)) {
