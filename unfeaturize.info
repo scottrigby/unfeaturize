@@ -1,3 +1,4 @@
 name = Unfeaturize
 description = A developer utility to help unfeaturize modules.
 core = 7.x
+files[] = Unfeaturize.inc
