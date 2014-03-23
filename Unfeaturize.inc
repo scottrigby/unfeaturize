@@ -41,6 +41,7 @@ class Unfeaturize {
   public $component_types;
   public $old_components;
   public $defaults = array();
+  public $classes = array();
 
   /**
    * Constructs the Unfeaturize object.
@@ -77,12 +78,19 @@ class Unfeaturize {
 
     $this->export_path = $export_path;
 
-    $this->setComponentDefaults();
-
     // @todo move to separate method, so we can preview code before export.
-    foreach ($this->defaults as $type => $names) {
-      $component = new UnfeaturizeComponentDispatcher($type, $names);
-      dpm($component);
+    // @todo Get instances of UnfeaturizeComponent, either by a traditional
+    //   Drupal hook or by some registry magic. Somehow we want to map
+    //   features component types to UnfeaturizeComponent classes.
+    $this->classes = module_invoke_all('unfeaturize_components');
+
+    $this->setComponentDefaults();
+    foreach ($this->defaults as $type => $data) {
+      if (isset($this->classes[$type]) && $this->classes[$type] instanceof UnfeaturizeComponentInterface) {
+        $class = $this->classes[$type];
+        $component = new $class($data);
+      }
+      $debug;
     }
   }
 
@@ -133,6 +141,7 @@ class Unfeaturize {
   public function setComponentDefaults() {
     $this->setComponents();
     // Get defaults.
+    // @todo Look at features_var_export().
     features_include_defaults(array_keys($this->old_components));
     foreach ($this->old_components as $type => $names) {
       if (isset($this->component_types[$type]['default_hook']) && $hook = $this->component_types[$type]['default_hook']) {
@@ -161,22 +170,6 @@ class Unfeaturize {
 }
 
 /**
- * Sketch for component class dispatcher.
- */
-class UnfeaturizeComponentDispatcher {
-
-  public $classes;
-
-  public function __construct($name, $data) {
-    // @todo Get instances of UnfeaturizeComponent, either by a traditional
-    //   Drupal hook or by some registry magic. Somehow we want to map
-    //   features component types to UnfeaturizeComponent classes.
-    $this->classes = module_invoke_all('unfeaturize_components');
-  }
-
-}
-
-/**
  * Sketch for component class.
  */
 interface UnfeaturizeComponentInterface {
@@ -189,10 +182,78 @@ interface UnfeaturizeComponentInterface {
 abstract class UnfeaturizeComponent implements UnfeaturizeComponentInterface {
 
   protected $data;
+  protected $old_name;
+  protected $name;
+  public $code = array();
 
-  public function __construct($name, $data) {
+  public function __construct($old_name, $name, $data) {
+    $this->old_name = $old_name;
+    $this->name = $name;
     $this->data = $data;
   }
+
+  /**
+   * @see features_export_render_defaults()
+   */
+  public function DocBlock() {
+    $code = array();
+
+    $code[] = '/**';
+    $code[] = ' * Data from deprecated ' . $this->old_name . '_user_default_roles().';
+    $code[] = ' *';
+    $code[] = ' * @return array';
+    $code[] = ' *   An array of role objects.';
+    $code[] = ' */';
+
+    return $code;
+  }
+
+}
+
+class UnfeaturizeComponentUserRole extends UnfeaturizeComponent {
+
+  public function componentDefinition() {
+    $old = $module_name . '_user_default_roles';
+    // Assumes the function is loaded. If not, bail.
+    if (!function_exists($old)) {
+      return;
+    }
+
+    // Begin refactored function string output.
+    $new = array();
+    $new[] = '/**';
+    $new[] = ' * Defines default roles.';
+    $new[] = ' *';
+    $new[] = ' * Role info from deprecated ' . $module_name . '_user_default_roles().';
+    $new[] = ' *';
+    $new[] = ' * @return array';
+    $new[] = ' *   An array of role objects.';
+    $new[] = ' */';
+    $new[] = 'function ' . $module_name . '_roles() {';
+    $new[] = '  $roles = array();';
+    $new[] = '';
+
+    foreach ($old() as $role) {
+      $new[] = '  $role = new stdClass();';
+      $new[] = '  $role->name = \'' . $role['name'] . '\';';
+      $new[] = '  $role->weight = ' . $role['weight'] . ';';
+      $new[] = '  $roles[] = $role;';
+      $new[] = '';
+    }
+
+    $new[] = '  return $roles;';
+    $new[] = "}";
+
+    return implode("\n", $new);
+  }
+  public function componentInstaller() {};
+
+}
+
+class UnfeaturizeComponentStrongarm extends UnfeaturizeComponent {
+
+  public function componentDefinition() {}
+  public function componentInstaller() {};
 
 }
 

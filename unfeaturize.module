@@ -9,6 +9,23 @@ function unfeaturize_unfeaturize_components() {
   return array(
     'field_base' => 'UnfeaturizeComponentFieldBase',
     'field_instance' => 'UnfeaturizeComponentFieldInstance',
+    'user_role' => 'UnfeaturizeComponentUserRole',
     'views_view' => 'UnfeaturizeComponentViewsView',
   );
+}
+
+/**
+ * @see features_export_render()
+ */
+function unfeaturize_export_render() {
+  $code = array();
+
+  $component_hooks = features_export_render_hooks($export, $module_name, $reset);
+  $components = features_get_components();
+  $deprecated = features_get_deprecated($components);
+
+  // Group component code into their respective files
+  foreach ($component_hooks as $component => $hooks) {
+
+  }
 }
