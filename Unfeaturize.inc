@@ -7,26 +7,45 @@
 /**
  * An object to help unfeaturize a module.
  */
-abstract class Unfeaturize {
+class Unfeaturize {
 
   /**
-   * The name of the module to unfeaturize.
+   * The name of the old module to unfeaturize.
    *
    * @var string
    */
-  protected $module;
+  public $old_name;
+
+  /**
+   * The name of the new unfeaturized module.
+   *
+   * @var string
+   */
+  public $name;
 
   /**
    * An optional array of Features components to exclude.
    *
    * @var array
    */
-  protected $exclude = array();
+  public $exclude;
+
+  /**
+   * The exported unfeaturized module directory.
+   *
+   * @var null|string
+   */
+  public $export_path;
+
+  public $old_object;
+  public $component_types;
+  public $old_components;
+  public $defaults = array();
 
   /**
    * Constructs the Unfeaturize object.
    *
-   * @param string $module
+   * @param string $old_name
    *   The name of the module to unfeaturize.
    * @param string $new_name
    *   An optional new name for the unfeaturized module. If not provided, the
@@ -34,8 +53,9 @@ abstract class Unfeaturize {
    * @param array $exclude
    *   An optional array of Features components to exclude.
    */
-  public function __construct($module, $new_name = NULL, $exclude = array()) {
-    $this->module = $module;
+  public function __construct($old_name, $new_name = NULL, $exclude = array()) {
+    $this->old_name = $old_name;
+    $this->name = isset($new_name) ? $new_name : $this->old_name;
     $this->exclude = $exclude;
   }
 
@@ -46,24 +66,24 @@ abstract class Unfeaturize {
    * in the original.
    */
   public function export() {
-    $files_directory = $this->getDirectoryPath();
-    if ($this->prepareDirectory($files_directory . '/unfeaturized/' . $this->module)) {
-      // @todo This can come later.
+    if (!$files_directory = $this->getDirectoryPath()) {
+      return FALSE;
+    }
+
+    $export_path = $files_directory . '/unfeaturized/' . $this->old_name;
+    if (!$this->prepareDirectory($export_path)) {
+      return FALSE;
     };
-  }
 
-  /**
-   * Gets unfeaturized definition function, by component.
-   */
-  public function getComponentDefinition($component) {
-    return $this->componentDefinition();
-  }
+    $this->export_path = $export_path;
 
-  /**
-   * Gets unfeaturized installer function, by component.
-   */
-  public function getComponentInstaller($component) {
-    return $this->componentInstaller();
+    $this->setComponentDefaults();
+
+    // @todo move to separate method, so we can preview code before export.
+    foreach ($this->defaults as $type => $names) {
+      $component = new UnfeaturizeComponentDispatcher($type, $names);
+      dpm($component);
+    }
   }
 
   /**
@@ -100,4 +120,79 @@ abstract class Unfeaturize {
     }
   }
 
+  protected function featuresInclude($name) {
+    module_load_include('inc', 'features', $name);
+  }
+
+  public function setComponents() {
+    $this->old_object = features_load_feature($this->old_name);
+    $this->component_types = features_get_feature_components();
+    $this->old_components = array_intersect_key($this->old_object->info['features'], $this->component_types);
+  }
+
+  public function setComponentDefaults() {
+    $this->setComponents();
+    // Get defaults.
+    features_include_defaults(array_keys($this->old_components));
+    foreach ($this->old_components as $type => $names) {
+      if (isset($this->component_types[$type]['default_hook']) && $hook = $this->component_types[$type]['default_hook']) {
+        $callback = $this->old_name . '_' . $hook;
+        if (function_exists($callback)) {
+          $this->defaults[$type] = call_user_func($callback);
+        }
+      }
+    }
+  }
+
+  /**
+   * Gets unfeaturized definition function, by component.
+   */
+  public function getComponentDefinition($component) {
+    return $this->componentDefinition();
+  }
+
+  /**
+   * Gets unfeaturized installer function, by component.
+   */
+  public function getComponentInstaller($component) {
+    return $this->componentInstaller();
+  }
+
 }
+
+/**
+ * Sketch for component class dispatcher.
+ */
+class UnfeaturizeComponentDispatcher {
+
+  public $classes;
+
+  public function __construct($name, $data) {
+    // @todo Get instances of UnfeaturizeComponent, either by a traditional
+    //   Drupal hook or by some registry magic. Somehow we want to map
+    //   features component types to UnfeaturizeComponent classes.
+    $this->classes = module_invoke_all('unfeaturize_components');
+  }
+
+}
+
+/**
+ * Sketch for component class.
+ */
+interface UnfeaturizeComponentInterface {
+
+  public function componentDefinition();
+  public function componentInstaller();
+
+}
+
+abstract class UnfeaturizeComponent implements UnfeaturizeComponentInterface {
+
+  protected $data;
+
+  public function __construct($name, $data) {
+    $this->data = $data;
+  }
+
+}
+

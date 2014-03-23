@@ -4,3 +4,11 @@
  * @file
  * Hook implementations and API functions for Unfeaturize module.
  */
+
+function unfeaturize_unfeaturize_components() {
+  return array(
+    'field_base' => 'UnfeaturizeComponentFieldBase',
+    'field_instance' => 'UnfeaturizeComponentFieldInstance',
+    'views_view' => 'UnfeaturizeComponentViewsView',
+  );
+}
