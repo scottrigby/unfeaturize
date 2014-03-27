@@ -173,6 +173,10 @@ function unfeaturize_export_render_modify(&$files) {
     }
     unset($info['features']);
   }
+  // Change package.
+  if (isset($info['package']) && $info['package'] == 'Features') {
+    $info['package'] = 'Unfeaturize';
+  }
   // Now recreate the string in Drupal .info format.
   $files['info'] = features_export_info($info);
 }
