@@ -12,7 +12,7 @@ function unfeaturize_drush_command() {
   $items = array();
 
   $items['unfeaturize-export'] = array(
-    'description' => "Export unfeaturized modules to the files directory.",
+    'description' => "Export unfeaturized modules.",
     'arguments' => array(
       'feature' => 'A space delimited list of features.',
     ),

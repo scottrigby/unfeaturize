@@ -6,7 +6,7 @@
  */
 
 /**
- * Writes a newly unfeaturized module to the files directory.
+ * Exports a newly unfeaturized module.
  *
  * @param string $module_name
  *   The original Feature module name.
