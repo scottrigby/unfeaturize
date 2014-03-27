@@ -16,17 +16,12 @@
  * @see _drush_features_export()
  */
 function unfeaturize_export($module_name) {
-  $files = unfeaturize_export_render($module_name);
-
-  $wrapper = file_stream_wrapper_get_instance_by_scheme('public');
-  $files_directory = $wrapper->getDirectoryPath();
-
-  // Standardize the file path location.
-  $path = $files_directory . '/unfeaturized/' . $module_name;
+  $path = unfeaturize_export_path($module_name);
   if (!unfeaturize_prepare_directory($path)) {
     return FALSE;
   };
 
+  $files = unfeaturize_export_render($module_name);
   foreach ($files as $extension => $data) {
     if (!in_array($extension, array('module', 'info'))) {
       $extension .= '.inc';
@@ -34,9 +29,31 @@ function unfeaturize_export($module_name) {
     $destination = "{$path}/{$module_name}.$extension";
     if (!file_unmanaged_save_data($data, $destination, FILE_EXISTS_REPLACE)) {
       watchdog('Unfeaturize', 'The file @destination can not be saved.', array('@destination' => $destination), WATCHDOG_WARNING);
+      features_log();
       break;
     }
   }
+
+  return TRUE;
+}
+
+/**
+ * Gets the unfeaturized export path location.
+ *
+ * @param string $module_name
+ *   The original Feature module name.
+ *
+ * @return string
+ *   The module export path location.
+ */
+function unfeaturize_export_path($module_name) {
+  $wrapper = file_stream_wrapper_get_instance_by_scheme('public');
+  $files_directory = $wrapper->getDirectoryPath();
+
+  // Standardize the file path location.
+  $path = $files_directory . '/unfeaturized/' . $module_name;
+
+  return $path;
 }
 
 /**
