@@ -34,12 +34,14 @@ function unfeaturize_drush_help($section) {
 }
 
 /**
- * @see unfeaturize_export()
+ * Exports unfeaturized modules.
+ *
  * @see drush_features_update()
  * @see _drush_features_export()
  */
 function drush_unfeaturize_export() {
   if ($args = func_get_args()) {
+    module_load_include('inc', 'unfeaturize', 'unfeaturize.export');
     foreach ($args as $module) {
       if (($feature = features_load_feature($module, TRUE)) && module_exists($module)) {
         $directory = unfeaturize_export_path($module);
