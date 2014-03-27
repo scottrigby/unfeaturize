@@ -10,13 +10,15 @@
  *
  * @param string $module_name
  *   The original Feature module name.
+ * @param null|string $path
+ *   Optional module export path.
  *
  * @return bool
  *
  * @see _drush_features_export()
  */
-function unfeaturize_export($module_name) {
-  $path = unfeaturize_export_path($module_name);
+function unfeaturize_export($module_name, $path = NULL) {
+  $path = isset($path) ? $path : unfeaturize_export_path($module_name);
   if (!unfeaturize_prepare_directory($path)) {
     return FALSE;
   };
@@ -38,13 +40,13 @@ function unfeaturize_export($module_name) {
 }
 
 /**
- * Gets the unfeaturized export path location.
+ * Gets the default module export path.
  *
  * @param string $module_name
  *   The original Feature module name.
  *
  * @return string
- *   The module export path location.
+ *   The default module export path.
  */
 function unfeaturize_export_path($module_name) {
   $wrapper = file_stream_wrapper_get_instance_by_scheme('public');
