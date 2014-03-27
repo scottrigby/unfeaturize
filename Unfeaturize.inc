@@ -118,7 +118,7 @@ class Unfeaturize {
    *   See return value of file_prepare_directory().
    */
   protected function prepareDirectory($directory) {
-    if (!file_prepare_directory($directory, FILE_CREATE_DIRECTORY)) {
+    if (!file_prepare_directory($directory, FILE_MODIFY_PERMISSIONS | FILE_CREATE_DIRECTORY)) {
       watchdog('Unfeaturize', 'The directory @directory can not be created.', array('@directory' => $directory), WATCHDOG_WARNING);
       return FALSE;
     }
