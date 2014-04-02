@@ -30,8 +30,7 @@ function unfeaturize_export($module_name, $path = NULL) {
     }
     $destination = "{$path}/{$module_name}.$extension";
     if (!file_unmanaged_save_data($data, $destination, FILE_EXISTS_REPLACE)) {
-      watchdog('Unfeaturize', 'The file @destination can not be saved.', array('@destination' => $destination), WATCHDOG_WARNING);
-      features_log();
+      features_log(t('The file @destination can not be saved.', array('@destination' => $destination)), 'warning');
       break;
     }
   }
@@ -192,11 +191,11 @@ function unfeaturize_export_render_modify(&$files) {
  */
 function unfeaturize_prepare_directory($directory) {
   if (!file_prepare_directory($directory, FILE_MODIFY_PERMISSIONS | FILE_CREATE_DIRECTORY)) {
-    watchdog('Unfeaturize', 'The directory @directory can not be created.', array('@directory' => $directory), WATCHDOG_WARNING);
+    features_log(t('The directory @directory can not be created.', array('@directory' => $directory)), 'warning');
     return FALSE;
   }
   else {
-    watchdog('Unfeaturize', 'The directory @directory was created.', array('@directory' => $directory), WATCHDOG_INFO);
+    features_log(t('The directory @directory was created.', array('@directory' => $directory)), 'status');
     return TRUE;
   }
 }
