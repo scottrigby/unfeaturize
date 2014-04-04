@@ -2,24 +2,28 @@
 
 /**
  * @file
- * Hook implementations and API functions for Unfeaturize module.
+ * API functions for Unfeaturize module.
  */
 
 /**
  * Restores unfeaturized components to the database.
  *
  * We have to build our own system here:
- * - We can't re-use Features restore hooks because many of them do not insert
- *   code into the database (like CTools), by design.
- * - We can't use 'features_consolidate' from http://drupal.org/node/663136
- *   because it relies on features_invoke().
- * - We can't use features_invoke() because it relies on features_hook(), which
- *   relies on features_get_components().
- * - We specifically do not want our unfeaturized components to be recognized as
- *   features components (that's the point of this module).
+ * - We can't re-use Features restore hooks because many of them (like CTools)
+ *   do not insert code into the database by design.
+ * - We are not using 'features_consolidate' (http://drupal.org/node/663136)
+ *   because apart from inserting exportables into the database (which the
+ *   patch has only started), it does not change the module's status as a
+ *   Feature. We specifically want our unfeaturized components to no longer be
+ *   recognized as features components, in order to relinquish ownership over
+ *   them for use elsewhere.
+ * - The 'feature Unlink' part of ftools is closer to our intent, but it doesn't
+ *   meet our strategy to make upstream contribution easier by keeping the same
+ *   format as features exportables. And it's functions are not currently robust
+ *   enough to make use of.
  *
- * @todo Maybe I was wrong? ^. features_get_components() is fine. Also remember
- *   features_get_feature_components().
+ * @todo Consider joining forces with ftools if the strategy this module
+ *   proposes continues to gain momentum.
  *
  * @param string $module
  *   An unfeaturized module name.
