@@ -19,6 +19,17 @@ function unfeaturize_drush_command() {
     'drupal dependencies' => array('unfeaturize'),
     'aliases' => array('ufe'),
   );
+  $items['unfeaturize-restore'] = array(
+    'description' => "Restores a module's unfeaturized components to the database.",
+    'arguments' => array(
+      'feature' => 'A space delimited list of modules or MODULE.COMPONENT pairs.',
+    ),
+    'examples' => array(
+      'drush fr foo.node foo.taxonomy bar' => 'Restore node and taxonomy components of feature "foo". Restore all components of feature "bar".',
+    ),
+    'drupal dependencies' => array('unfeaturize'),
+    'aliases' => array('ufr'),
+  );
 
   return $items;
 }
@@ -67,5 +78,59 @@ function drush_unfeaturize_export() {
       $rows[] = array($name);
     }
     drush_print_table($rows, TRUE);
+  }
+}
+
+/**
+ * Restores a module's unfeaturized components to the database.
+ */
+function drush_unfeaturize_restore() {
+  if ($args = func_get_args()) {
+
+    // Parse list of arguments.
+    // @see drush_features_revert().
+    $modules = array();
+    foreach ($args as $arg) {
+      $arg = explode('.', $arg);
+      $module = array_shift($arg);
+      $component_type = array_shift($arg);
+      if (isset($module)) {
+        if (empty($component_type)) {
+          // If we received just a module name, get all unfeaturized components.
+          $modules[$module] = TRUE;
+        }
+        elseif ($modules[$module] !== TRUE) {
+          if (!isset($modules[$module])) {
+            $modules[$module] = array();
+          }
+          $modules[$module][] = $component_type;
+        }
+      }
+    }
+
+    foreach ($modules as $module => $component_types_needed) {
+      $dt_args['@module'] = $module;
+      $component_types = array_keys(unfeaturize_get_components($module));
+      if (!empty($component_types_needed) && is_array($component_types_needed)) {
+        $component_types = array_intersect($component_types, $component_types_needed);
+      }
+      if (empty($component_types)) {
+        drush_log(dt('There are no unfeaturized components for @module.', $dt_args), 'ok');
+      }
+      else {
+        foreach ($component_types as $component_type) {
+          $dt_args['@component_type'] = $component_type;
+          if (features_invoke($component_type, 'features_unfeaturize', $module)) {
+            drush_log(dt("Restoring unfeaturized component type @module.@component_type", $dt_args), 'ok');
+          }
+          else {
+            drush_log(dt("Could not restore unfeaturized component type @module.@component_type", $dt_args), 'error');
+          }
+        }
+      }
+    }
+  }
+  else {
+    drush_features_list();
   }
 }
