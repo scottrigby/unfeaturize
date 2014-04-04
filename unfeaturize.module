@@ -6,6 +6,15 @@
  */
 
 /**
+ * Defines a number of supported component hooks.
+ *
+ * @todo Change this to a function `unfeaturize_include_hooks()`, which loads
+ *   each hook from it's own file in includes/unfeaturize.COMPONENT.inc. Just
+ *   include a single file for now.
+ */
+include_once 'unfeaturize.component_hooks.inc';
+
+/**
  * Restores unfeaturized components to the database.
  *
  * We have to build our own system here:
