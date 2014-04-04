@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Component hook implementations for Unfeaturize module.
+ * Views component hook implementations for Unfeaturize module.
  */
 
 /**
@@ -59,10 +59,4 @@ function views_view_unfeaturize($module, $defaults) {
     $view->save();
     features_log(t('The view %name has been restored.', array('%name' => $view->get_human_name())), 'status');
   }
-}
-
-/**
- * Implements hook_unfeaturize() for field_base component.
- */
-function field_base_unfeaturize($module, $defaults) {
 }

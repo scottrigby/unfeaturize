@@ -6,13 +6,22 @@
  */
 
 /**
- * Defines a number of supported component hooks.
+ * load component includes provided by Unfeaturize.
  *
- * @todo Change this to a function `unfeaturize_include_hooks()`, which loads
- *   each hook from it's own file in includes/unfeaturize.COMPONENT.inc. Just
- *   include a single file for now.
+ * Other modules implementing additional unfeaturize component hooks are
+ * responsible for ensuring they are loaded.
+ *
+ * @see features_include()
+ * @see hook_unfeaturize()
  */
-include_once 'unfeaturize.component_hooks.inc';
+function unfeaturize_include() {
+  // Unfeaturize provides integration on behalf of these modules.
+  // @todo Add to this array as we add each module's component hooks include.
+  $modules = array('field', 'views');
+  foreach (array_filter($modules, 'module_exists') as $module) {
+    module_load_include('inc', 'features', "includes/unfeaturize.$module");
+  }
+}
 
 /**
  * Restores unfeaturized components to the database.
