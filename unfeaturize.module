@@ -4,3 +4,161 @@
  * @file
  * Hook implementations and API functions for Unfeaturize module.
  */
+
+/**
+ * Restores unfeaturized components to the database.
+ *
+ * We have to build our own system here:
+ * - We can't re-use Features restore hooks because many of them do not insert
+ *   code into the database (like CTools), by design.
+ * - We can't use 'features_consolidate' from http://drupal.org/node/663136
+ *   because it relies on features_invoke().
+ * - We can't use features_invoke() because it relies on features_hook(), which
+ *   relies on features_get_components().
+ * - We specifically do not want our unfeaturized components to be recognized as
+ *   features components (that's the point of this module).
+ *
+ * @todo Maybe I was wrong? ^. features_get_components() is fine. Also remember
+ *   features_get_feature_components().
+ *
+ * @param string $module
+ *   An unfeaturized module name.
+ *
+ * @see _features_restore()
+ */
+function unfeaturize_restore($module) {
+  $components = unfeaturize_get_components($module);
+  foreach ($components as $component_type => $items) {
+    // @todo Consider getting the defaults in each implementation of
+    //   hook_features_unfeaturize() instead of here.
+    $defaults = unfeaturize_get_defaults($module, $component_type);
+
+    // @todo Build our own set of restore hooks, similar to
+    //   features_consolidate, but with a slightly different intent. We want to
+    //   load the exported default definitions into the DB, without Features
+    //   knowing anything about them.
+    // @todo Document this hook in unfeaturize.api.php.
+    features_invoke($component_type, 'features_unfeaturize', $items, $module, $defaults);
+  }
+}
+
+/**
+ * Gets a module's unfeaturized components.
+ *
+ * @todo We trust that unfeaturize exported the components properly. Alternately
+ *   we can filter by features_get_feature_components().
+ *
+ * @param string $module
+ *   The module name.
+ *
+ * @return array
+ *   An associative array of unfeaturized component names, keyed by type.
+ */
+function unfeaturize_get_components($module) {
+  $components = &drupal_static(__FUNCTION__);
+
+  if (!isset($components[$module])) {
+    $info = system_get_info('module', $module);
+    if (empty($info)) {
+      // We may want this info, even when the module is not enabled.
+      $path = drupal_get_path('module', $module);
+      $info = drupal_parse_info_file($path . '/' . $module . '.info');
+    }
+    $components[$module] = isset($info['unfeaturize']) ? $info['unfeaturize'] : array();
+  }
+
+  return $components[$module];
+}
+
+/**
+ * Gets a module's unfeaturized defaults.
+ *
+ * @param string $module
+ *   The module name.
+ * @param null|string $component_type
+ *   The component type. Optional, unless also specifying a component name.
+ * @param null|string $component
+ *   An optional component name.
+ *
+ * @return array|object|false
+ *   - If only $module is specified: A multidimensional array of unfeaturized
+ *     component defaults, keyed by component name, then by component type.
+ *   - If $component_type is specified: An associative array of the module's
+ *     component defaults only of that type, keyed by component name.
+ *   - If $component is also specified: A single default result - structured
+ *     according to the component type's default callback signature - or FALSE.
+ *
+ * @see features_get_default()
+ */
+function unfeaturize_get_defaults($module, $component_type = NULL, $component = NULL) {
+  $defaults = &drupal_static(__FUNCTION__, array());
+
+  // Account for the two optional params and static caching.
+  if ($component_type) {
+    if (!isset($defaults[$module][$component_type])) {
+      // Get all component defaults for only this type.
+      $defaults[$module][$component_type] = _unfeaturize_call_default_hook($module, $component_type);
+    }
+    if ($component) {
+      return isset($defaults[$module][$component_type][$component]) ? $defaults[$module][$component_type][$component] : FALSE;
+    }
+    else {
+      return $defaults[$module][$component_type];
+    }
+  }
+  else {
+    if (!isset($defaults[$module])) {
+      $defaults[$module] = array();
+      // Get all component defaults for this module.
+      $components = unfeaturize_get_components($module);
+      foreach ($components as $component_type => $names) {
+        $defaults[$module][$component_type] = _unfeaturize_call_default_hook($module, $component_type);
+      }
+    }
+    return $defaults[$module];
+  }
+}
+
+/**
+ * Calls a Features component default hook.
+ *
+ * @param string $module
+ *   The module name.
+ * @param string $component_type
+ *   The component type.
+ *
+ * @return array
+ *   An associative array of component type defaults, keyed by component.
+ */
+function _unfeaturize_call_default_hook($module, $component_type) {
+  $defaults = array();
+
+  // Load the export include only once, as this may be called up to once for
+  // every unfeaturized component defined in a module.
+  $included = &drupal_static(__FUNCTION__ . '_included');
+  if (!isset($included)) {
+    $included = module_load_include('inc', 'features', 'features.export');
+  }
+
+  // These Features functions are static cached already.
+  $hooks = features_get_default_hooks();
+  if (isset($hooks[$component_type]) && $hook = $hooks[$component_type]) {
+    // We want to load all the include files, but we can't use
+    // features_include_defaults() because it explicitly checks the info file
+    // for the feature component.
+    $components = features_get_feature_components();
+    if ($info = $components[$component_type]) {
+      $filename = isset($info['default_file']) && $info['default_file'] == FEATURES_DEFAULTS_CUSTOM ? $info['default_filename'] : "features.{$component_type}";
+      if (module_exists($module)) {
+        module_load_include('inc', $module, "{$module}.$filename");
+      }
+    }
+
+    $function = $module . '_' . $hook;
+    if (function_exists($function)) {
+      $defaults = $function();
+    }
+  }
+
+  return $defaults;
+}
