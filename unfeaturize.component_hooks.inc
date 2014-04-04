@@ -23,40 +23,42 @@
  * don't set the cache, we also save an additional ctools_object_cache_clear().
  */
 function views_view_unfeaturize($module, $defaults) {
-  // Check API version.
-  if (empty($view->api_version) || $view->api_version < 2) {
-    features_log(t('That view is not compatible with this version of Views.
-      If you have a view from views1 you have to go to a drupal6 installation and import it there.'), 'error');
-    return FALSE;
-  }
-  elseif (version_compare($view->api_version, views_api_version(), '>')) {
-    features_log(t('That view is created for the version @import_version of views, but you only have @api_version', array(
-      '@import_version' => $view->api_version,
-      '@api_version' => views_api_version())), 'error');
-    return FALSE;
-  }
-
-  // Copy the view, and set the base table properly if this is overwriting an
-  // existing view.
-  $test = views_get_view($view->name);
-  if ($test->vid) {
-    $view->vid = $test->vid;
-  }
-  $view->update();
-
-  // Mimic the views_ui edit form submission. Note view::validate() calls
-  // view::init_display() for us.
-  $errors = $view->validate();
-  if ($errors !== TRUE) {
-    foreach ($errors as $error) {
-      features_log($error, 'error');
+  foreach($defaults as $view) {
+    // Check API version.
+    if (empty($view->api_version) || $view->api_version < 2) {
+      features_log(t('That view is not compatible with this version of Views.
+        If you have a view from views1 you have to go to a drupal6 installation and import it there.'), 'error');
+      return FALSE;
     }
-    return FALSE;
-  }
+    elseif (version_compare($view->api_version, views_api_version(), '>')) {
+      features_log(t('That view is created for the version @import_version of views, but you only have @api_version', array(
+        '@import_version' => $view->api_version,
+        '@api_version' => views_api_version())), 'error');
+      return FALSE;
+    }
 
-  // If we get this far, restore the view.
-  $view->save();
-  features_log(t('The view %name has been saved.', array('%name' => $view->get_human_name())), 'status');
+    // Copy the view, and set the base table properly if this is overwriting an
+    // existing view.
+    $test = views_get_view($view->name);
+    if ($test->vid) {
+      $view->vid = $test->vid;
+    }
+    $view->update();
+
+    // Mimic the views_ui edit form submission. Note view::validate() calls
+    // view::init_display() for us.
+    $errors = $view->validate();
+    if ($errors !== TRUE) {
+      foreach ($errors as $error) {
+        features_log($error, 'error');
+      }
+      return FALSE;
+    }
+
+    // If we get this far, restore the view.
+    $view->save();
+    features_log(t('The view %name has been restored.', array('%name' => $view->get_human_name())), 'status');
+  }
 }
 
 /**
