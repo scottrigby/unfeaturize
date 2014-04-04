@@ -28,17 +28,17 @@
  */
 function unfeaturize_restore($module) {
   $components = unfeaturize_get_components($module);
-  foreach ($components as $component_type => $items) {
-    // @todo Consider getting the defaults in each implementation of
-    //   hook_features_unfeaturize() instead of here.
-    $defaults = unfeaturize_get_defaults($module, $component_type);
-
+  foreach (array_keys($components) as $component_type) {
     // @todo Build our own set of restore hooks, similar to
     //   features_consolidate, but with a slightly different intent. We want to
     //   load the exported default definitions into the DB, without Features
     //   knowing anything about them.
+    // @todo Consider invoking this hook for each component item, rather than
+    //   all components of a particular type for a module (for future per
+    //   unfeaturized component reverting).
     // @todo Document this hook in unfeaturize.api.php.
-    features_invoke($component_type, 'features_unfeaturize', $items, $module, $defaults);
+    $defaults = unfeaturize_get_defaults($module, $component_type);
+    features_invoke($component_type, 'unfeaturize', $module, $defaults);
   }
 }
 
