@@ -86,6 +86,7 @@ function drush_unfeaturize_export() {
  */
 function drush_unfeaturize_restore() {
   if ($args = func_get_args()) {
+    unfeaturize_include();
 
     // Parse list of arguments.
     // @see drush_features_revert().

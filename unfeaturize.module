@@ -49,6 +49,7 @@ function unfeaturize_include() {
  * @see _features_restore()
  */
 function unfeaturize_restore($module) {
+  unfeaturize_include();
   $components = unfeaturize_get_components($module);
   foreach (array_keys($components) as $component_type) {
     // @todo Build our own set of restore hooks, similar to
