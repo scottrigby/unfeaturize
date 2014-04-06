@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Views component hook implementations for Unfeaturize module.
+ * views.module components hook implementations for Unfeaturize module.
  */
 
 /**

@@ -121,8 +121,8 @@ function drush_unfeaturize_restore() {
       else {
         foreach ($component_types as $component_type) {
           $dt_args['@component_type'] = $component_type;
-          $defaults = unfeaturize_get_defaults($module, $component_type);
-          if (features_invoke($component_type, 'unfeaturize', $module, $defaults)) {
+          if ($defaults = unfeaturize_get_defaults($module, $component_type)) {
+            features_invoke($component_type, 'unfeaturize_restore', $module, $defaults);
             drush_log(dt("Restoring unfeaturized component type @module.@component_type", $dt_args), 'ok');
           }
           else {

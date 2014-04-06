@@ -40,7 +40,7 @@ function unfeaturize_include() {
  *   format as features exportables. And it's functions are not currently robust
  *   enough to make use of.
  *
- * @todo Consider joining forces with ftools if the strategy this module
+ * @todo Consider joining forces with ftools if the strategy unfeaturize.module
  *   proposes continues to gain momentum.
  *
  * @param string $module
@@ -58,10 +58,11 @@ function unfeaturize_restore($module) {
     //   knowing anything about them.
     // @todo Consider invoking this hook for each component item, rather than
     //   all components of a particular type for a module (for future per
-    //   unfeaturized component reverting).
-    // @todo Document this hook in unfeaturize.api.php.
-    $defaults = unfeaturize_get_defaults($module, $component_type);
-    features_invoke($component_type, 'unfeaturize', $module, $defaults);
+    //   unfeaturized component reverting). For now, we're following
+    //   hook_features_revert() here.
+    if ($defaults = unfeaturize_get_defaults($module, $component_type)) {
+      features_invoke($component_type, 'unfeaturize_restore', $module, $defaults);
+    }
   }
 }
 
@@ -151,11 +152,10 @@ function unfeaturize_get_defaults($module, $component_type = NULL, $component = 
  *   The component type.
  *
  * @return array
- *   An associative array of component type defaults, keyed by component.
+ *   An associative array of component type defaults, keyed by component, or
+ *   FALSE.
  */
 function _unfeaturize_call_default_hook($module, $component_type) {
-  $defaults = array();
-
   // Load the export include only once, as this may be called up to once for
   // every unfeaturized component defined in a module.
   $included = &drupal_static(__FUNCTION__ . '_included');
@@ -178,9 +178,7 @@ function _unfeaturize_call_default_hook($module, $component_type) {
     }
 
     $function = $module . '_' . $hook;
-    if (function_exists($function)) {
-      $defaults = $function();
-    }
+    $defaults = function_exists($function) ? $function() : FALSE;
   }
 
   return $defaults;

@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Field component hook implementations for Unfeaturize module.
+ * field.module components hook implementations for Unfeaturize module.
  */
 
 /**
