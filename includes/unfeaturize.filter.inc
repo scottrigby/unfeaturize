@@ -6,7 +6,7 @@
  */
 
 /**
- * Implements hook_unfeaturize() for filter component.
+ * Implements hook_unfeaturize_restore() for filter component.
  *
  * We can not pass our unfeaturized defaults to filter_features_rebuild()
  * directly, because it assumes they should be from features_get_default().

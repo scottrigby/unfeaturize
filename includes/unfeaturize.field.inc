@@ -6,7 +6,7 @@
  */
 
 /**
- * Implements hook_unfeaturize() for field_base component.
+ * Implements hook_unfeaturize_restore() for field_base component.
  *
  * We can not pass our unfeaturized defaults to field_base_features_rebuild()
  * directly, because it assumes they should be from features_get_default().
@@ -40,7 +40,7 @@ function field_base_unfeaturize($module, $defaults) {
 }
 
 /**
- * Implements hook_unfeaturize() for field_instance component.
+ * Implements hook_unfeaturize_restore() for field_instance component.
  *
  * We can not pass our unfeaturized defaults to
  * field_instance_features_rebuild() directly, because it assumes they should be

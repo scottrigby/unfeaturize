@@ -6,7 +6,7 @@
  */
 
 /**
- * Implements hook_unfeaturize() for views_view component.
+ * Implements hook_unfeaturize_restore() for views_view component.
  *
  * Recreate relevant pieces of views_ui_import_validate(), otherwise we would
  * need to add views_ui.module as a dependency, and deal with form errors and

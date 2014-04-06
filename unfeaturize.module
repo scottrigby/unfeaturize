@@ -12,7 +12,7 @@
  * responsible for ensuring they are loaded.
  *
  * @see features_include()
- * @see hook_unfeaturize()
+ * @see hook_unfeaturize_restore()
  */
 function unfeaturize_include() {
   // Unfeaturize provides integration on behalf of these modules.
