@@ -17,7 +17,7 @@
 function unfeaturize_include() {
   // Unfeaturize provides integration on behalf of these modules.
   // @todo Add to this array as we add each module's component hooks include.
-  $modules = array('field', 'views');
+  $modules = array('field', 'filter', 'views');
   foreach (array_filter($modules, 'module_exists') as $module) {
     module_load_include('inc', 'unfeaturize', "includes/unfeaturize.$module");
   }
