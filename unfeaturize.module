@@ -6,20 +6,25 @@
  */
 
 /**
- * load component includes provided by Unfeaturize.
+ * Loads unfeaturize component includes by file name pattern detection.
  *
- * Other modules implementing additional unfeaturize component hooks are
- * responsible for ensuring they are loaded.
- *
- * @see features_include()
- * @see hook_unfeaturize_restore()
+ * Other modules implementing unfeaturize component hooks can have their include
+ * files loaded by following the pattern 'unfeaturize.COMPONENT_MODULE.inc'
+ * (where COMPONENT_MODULE is the module responsible for the component type).
  */
 function unfeaturize_include() {
-  // Unfeaturize provides integration on behalf of these modules.
-  // @todo Add to this array as we add each module's component hooks include.
-  $modules = array('field', 'filter', 'views');
-  foreach (array_filter($modules, 'module_exists') as $module) {
-    module_load_include('inc', 'unfeaturize', "includes/unfeaturize.$module");
+  // Static cache because drupal_system_listing() isn't cheap.
+  $files = &drupal_static(__FUNCTION__, array());
+
+  if (empty($files)) {
+    features_include();
+    $pattern  = '(' . implode('|', module_implements('features_api')) . ')';
+    $regex = '/unfeaturize.' . $pattern . '\.inc$/';
+    $files = drupal_system_listing($regex, 'modules', 'name', 0);
+  }
+
+  foreach ($files as $file) {
+    include_once DRUPAL_ROOT . '/' . $file->uri;
   }
 }
 
