@@ -22,6 +22,9 @@
  * @param array $defaults
  *   An associative array of the module's component defaults only of that type,
  *   keyed by component name.
+ *
+ * @see unfeaturize_restore()
+ * @see drush_unfeaturize_restore()
  */
 function hook_unfeaturize_restore($module, $defaults) {
   // Example: filter component.
