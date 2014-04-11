@@ -157,11 +157,7 @@ function unfeaturize_export_strip(&$export) {
  */
 function unfeaturize_export_render_modify(&$files) {
   $info = drupal_parse_info_format($files['info']);
-  #if (isset($info['features'])) {
-  #  unset($info['features']);
-  #}
-  // OK that works, but maybe we want to keep this info so we can parse it and
-  // insert/revert programmatically.
+  // We want to keep this info so we can parse and restore later.
   if (!empty($info['features'])) {
     foreach ($info['features'] as $type => $component) {
       // Initialize type if needed.

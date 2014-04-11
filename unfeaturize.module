@@ -59,10 +59,6 @@ function unfeaturize_restore($module) {
   $components = unfeaturize_get_components($module);
   foreach (array_keys($components) as $component_type) {
     $t_args['@component_type'] = $component_type;
-    // @todo Build our own set of restore hooks, similar to
-    //   features_consolidate, but with a slightly different intent. We want to
-    //   load the exported default definitions into the DB, without Features
-    //   knowing anything about them.
     // @todo Consider invoking this hook for each component item, rather than
     //   all components of a particular type for a module (for future per
     //   unfeaturized component reverting). For now, we're following
