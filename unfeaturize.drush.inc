@@ -47,6 +47,8 @@ function unfeaturize_drush_help($section) {
 /**
  * Exports unfeaturized modules.
  *
+ * @todo Consolidate this logic with unfeaturize_export() even more.
+ *
  * @see drush_features_update()
  * @see _drush_features_export()
  */
@@ -83,6 +85,8 @@ function drush_unfeaturize_export() {
 
 /**
  * Restores a module's unfeaturized components to the database.
+ *
+ * @todo Consolidate this logic with unfeaturize_restore().
  */
 function drush_unfeaturize_restore() {
   if ($args = func_get_args()) {
