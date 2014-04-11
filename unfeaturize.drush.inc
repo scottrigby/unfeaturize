@@ -123,7 +123,12 @@ function drush_unfeaturize_restore() {
           $dt_args['@component_type'] = $component_type;
           if ($defaults = unfeaturize_get_defaults($module, $component_type)) {
             features_invoke($component_type, 'unfeaturize_restore', $module, $defaults);
-            drush_log(dt("Restoring unfeaturized component type @module.@component_type", $dt_args), 'ok');
+            if (features_hook($component_type, 'unfeaturize_restore')) {
+              drush_log(dt("Restoring unfeaturized component type @module.@component_type", $dt_args), 'ok');
+            }
+            else {
+              features_log(t('No callback to restore unfeaturized component type @module.@component_type.', $dt_args), 'warning');
+            }
           }
           else {
             drush_log(dt("Could not restore unfeaturized component type @module.@component_type", $dt_args), 'error');

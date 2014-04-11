@@ -55,8 +55,10 @@ function unfeaturize_include() {
  */
 function unfeaturize_restore($module) {
   unfeaturize_include();
+  $t_args['@module'] = $module;
   $components = unfeaturize_get_components($module);
   foreach (array_keys($components) as $component_type) {
+    $t_args['@component_type'] = $component_type;
     // @todo Build our own set of restore hooks, similar to
     //   features_consolidate, but with a slightly different intent. We want to
     //   load the exported default definitions into the DB, without Features
@@ -67,6 +69,12 @@ function unfeaturize_restore($module) {
     //   hook_features_revert() here.
     if ($defaults = unfeaturize_get_defaults($module, $component_type)) {
       features_invoke($component_type, 'unfeaturize_restore', $module, $defaults);
+      if (features_hook($component_type, 'unfeaturize_restore')) {
+        features_log(t('Restoring unfeaturized component type @module.@component_type.', $t_args), 'status');
+      }
+      else {
+        features_log(t('No callback to restore unfeaturized component type @module.@component_type.', $t_args), 'warning');
+      }
     }
   }
 }
