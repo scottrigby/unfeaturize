@@ -14,7 +14,7 @@
  *
  * @see field_base_features_rebuild()
  */
-function field_base_unfeaturize($module, $defaults) {
+function field_base_unfeaturize_restore($module, $defaults) {
   if ($fields = $defaults) {
     field_info_cache_clear();
 
@@ -49,7 +49,7 @@ function field_base_unfeaturize($module, $defaults) {
  *
  * @see field_instance_features_rebuild()
  */
-function field_instance_unfeaturize($module, $defaults) {
+function field_instance_unfeaturize_restore($module, $defaults) {
   if ($instances = $defaults) {
     field_info_cache_clear();
 

@@ -22,7 +22,7 @@
  * views_ui_edit_view_form_submit() as the user would do manually. Note since we
  * don't set the cache, we also save an additional ctools_object_cache_clear().
  */
-function views_view_unfeaturize($module, $defaults) {
+function views_view_unfeaturize_restore($module, $defaults) {
   foreach($defaults as $view) {
     // Check API version.
     if (empty($view->api_version) || $view->api_version < 2) {
