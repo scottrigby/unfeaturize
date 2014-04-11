@@ -173,6 +173,7 @@ function _unfeaturize_call_default_hook($module, $component_type) {
   }
 
   // These Features functions are static cached already.
+  $defaults = FALSE;
   $hooks = features_get_default_hooks();
   if (isset($hooks[$component_type]) && $hook = $hooks[$component_type]) {
     // We want to load all the include files, but we can't use
@@ -187,7 +188,9 @@ function _unfeaturize_call_default_hook($module, $component_type) {
     }
 
     $function = $module . '_' . $hook;
-    $defaults = function_exists($function) ? $function() : FALSE;
+    if (function_exists($function)) {
+      $defaults = $function();
+    }
   }
 
   return $defaults;
