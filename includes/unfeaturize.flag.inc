@@ -19,7 +19,7 @@ function flag_unfeaturize_restore($module, $defaults) {
   $entity_types = array();
 
   // Revert flags that are defined in code.
-  foreach ($default_flags as $flag_name => $flag_info) {
+  foreach ($defaults as $flag_name => $flag_info) {
     if (is_numeric($flag_name)) {
       // Backward compatibility.
       $flag_name = $flag_info['name'];
